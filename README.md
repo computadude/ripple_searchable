@@ -31,9 +31,11 @@ Any of the following criteria can be chained:
 === Example:
 
 ```ruby
-  Product.where(tags: "nerd", name: "joe", something: 2).or({can_sell:
-1}, {can_sell: 3}).between(availibility: 1..3, price: [3,
-12]).gte(quantity: 0, ratings: 5).sort(created_at, :desc).limit(5)
+  Product.where(tags: "nerd", name: "joe", something: 2)
+    .or({can_sell:1}, {can_sell: 3})
+    .between(availibility: 1..3, price: [3, 12])
+    .gte(quantity: 0, ratings: 5)
+    .sort(created_at, :desc).limit(5)
 ```
 
 ### Scoping
