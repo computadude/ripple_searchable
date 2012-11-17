@@ -52,7 +52,7 @@ Mongoid / Active Record style named scopes:
   end
 ```
 
-See docs for method details.
+See [docs](http://rubydoc.info/github/computadude/ripple_searchable/master/frames) for method details.
 
 TODO: Write better docs.
 
