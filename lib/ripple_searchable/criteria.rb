@@ -241,6 +241,8 @@ module Ripple
         klass.send(:with_scope, self) do
           klass.send(name, *args, &block)
         end
+      else
+        super
       end
     end
 
