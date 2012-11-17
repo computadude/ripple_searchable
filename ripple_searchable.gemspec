@@ -15,9 +15,9 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = RippleSearchable::VERSION
 
-  s.add_dependency "activesupport", [">= 3.0.0", "< 3.3.0"]
-  s.add_dependency "activemodel", [">= 3.0.0", "< 3.3.0"]
-  s.add_dependency "ripple", ">=1.0.0.beta2"
+  gem.add_dependency "activesupport", [">= 3.0.0", "< 3.3.0"]
+  gem.add_dependency "activemodel", [">= 3.0.0", "< 3.3.0"]
+  gem.add_dependency "ripple", ">=1.0.0.beta2"
 
-  s.add_development_dependency "rails", '3.2.8'
+  gem.add_development_dependency "rails", '3.2.8'
 end

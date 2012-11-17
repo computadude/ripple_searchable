@@ -1,6 +1,10 @@
 # RippleSearchable
 
-Mongoid / Active Record style query criteria and scoping for Ripple.
+Mongoid / Active Record style query criteria DSL and Scoping for Ripple
+using RIAK's solr search interface.
+
+RippleSearchable adds chainable Criteria methods such as :where, :lt, :lte, :gt, :gte, :between
+along with :sort, :skip, :limit options to your Ripple::Document models.
 
 ## Installation
 
@@ -18,9 +22,43 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+### Criteria:
+
+Any of the following criteria can be chained:
+
+    :where, :lt, :lte, :gt, :gte, :between, with sort, :skip, :limit
+
+=== Example:
+
+```ruby
+  Product.where(tags: "nerd", name: "joe", something: 2).or({can_sell:
+1}, {can_sell: 3}).between(availibility: 1..3, price: [3,
+12]).gte(quantity: 0, ratings: 5).sort(created_at, :desc).limit(5)
+```
+
+### Scoping
+
+Mongoid / Active Record style named scopes:
+
+=== Example:
+
+```ruby
+  class Product
+    include Ripple::Document
+
+    scope :active, where(active: true)
+    scope :avail, ->(count){ where(quantity: count)}
+
+  end
+```
+
+See docs for method details.
+
+TODO: Write better docs.
 
 ## Contributing
+
+This gem is still under heavy development. Feel free to contribute.
 
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
