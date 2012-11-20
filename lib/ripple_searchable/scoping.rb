@@ -35,7 +35,11 @@ module Ripple
       end
 
       def with_default_scope
-        default_scoping || scope_stack.last || Criteria.new(self)
+        default_scoping.try(:call) || without_default_scope
+      end
+
+      def without_default_scope
+        scope_stack.last || Criteria.new(self)
       end
 
       def with_scope(criteria)
