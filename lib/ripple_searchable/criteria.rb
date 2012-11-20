@@ -231,9 +231,19 @@ module Ripple
     end
 
     def merge(criteria)
+      crit = clone
+      crit.merge!(criteria)
+      crit
+    end
+
+    def merge!(criteria)
       add_restriction criteria.selector
       self.options.merge!(criteria.options)
       self
+    end
+
+    def to_proc
+      ->{ self }
     end
 
     def method_missing(name, *args, &block)

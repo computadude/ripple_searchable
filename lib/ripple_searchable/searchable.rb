@@ -27,7 +27,7 @@ module Ripple
       end
 
       def criteria
-        @criteria = Criteria.new(self)
+        @criteria = default_scoping.try(:call) || Criteria.new(self)
       end
     end
 

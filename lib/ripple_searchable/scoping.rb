@@ -14,12 +14,20 @@ module Ripple
 
       def scope(name, value, &block)
         name = name.to_sym
-        #valid_scope_name?(name)
+        valid_scope_name?(name)
         scopes[name] = {
           scope: strip_default_scope(value),
           extension: Module.new(&block)
         }
         define_scope_method(name)
+      end
+
+      def default_scope(value)
+        self.default_scoping = if default_scoping
+          ->{ default_scoping.call.merge(value.to_proc.call) }
+        else
+          value.to_proc
+        end
       end
 
       def scope_stack
@@ -42,8 +50,8 @@ module Ripple
     protected
 
       def valid_scope_name?(name)
-        if logger && respond_to?(name, true)
-          logger.warn "Creating scope :#{name}. " \
+        if Ripple.logger && respond_to?(name, true)
+          Ripple.logger.warn "Creating scope :#{name}. " \
                       "Overwriting existing method #{self.name}.#{name}."
         end
       end
@@ -62,7 +70,7 @@ module Ripple
 
       def strip_default_scope(value)
         if value.is_a?(Criteria)
-          ->{ value}
+          value.to_proc
         else
           value
         end
