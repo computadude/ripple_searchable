@@ -27,13 +27,14 @@ module Ripple
     # will append this selector:
     # "(tags:nerd AND name:Joe AND something:2)"
     def where(selector = nil)
-      case selector
-      when String
-        add_restriction selector
-      when Hash
-        add_restriction to_lucene_pair(selector)
+      clone.tap do |crit|
+        case selector
+        when String
+          crit.add_restriction selector
+        when Hash
+          crit.add_restriction to_lucene_pair(selector)
+        end
       end
-      self
     end
 
     # Add an OR selector
@@ -45,12 +46,13 @@ module Ripple
     # will append this selector:
     # "((name:Pants) OR (name:Shirt))"
     def or(*criterion)
-      add_restriction do
-        criterion.each do |crit|
-          add_restriction(to_lucene_pair(crit, operator: "OR"), operator: "OR" )
+      clone.tap do |crit|
+        crit.add_restriction do
+          criterion.each do |c|
+            crit.add_restriction(to_lucene_pair(c, operator: "OR"), operator: "OR" )
+          end
         end
       end
-      self
     end
 
     alias :any_of :or
@@ -66,12 +68,13 @@ module Ripple
     # will append this selector:
     # "((availibility:[1 TO 3] AND price:[12 TO 20]))"
     def between(*criterion)
-      add_restriction do
-        criterion.each do |crit|
-          add_restriction(to_lucene_pair(crit, operator: "BETWEEN"))
+      clone.tap do |crit|
+        crit.add_restriction do
+          criterion.each do |c|
+            crit.add_restriction(to_lucene_pair(c, operator: "BETWEEN"))
+          end
         end
       end
-      self
     end
 
     # Add a 'less or equal than' selector
@@ -83,13 +86,14 @@ module Ripple
     # will append this selector:
     # "((quantity:[* TO 10] AND ratings:[* TO 5]))"
     def lte(*criterion)
-      add_restriction do
-        criterion.each do |crit|
-          crit.each {|k,v| crit[k]=Array.wrap(v).unshift(10**20)}
-          add_restriction(to_lucene_pair(crit, operator: "BETWEEN"))
+      clone.tap do |crit|
+        crit.add_restriction do
+          crit.criterion.each do |c|
+            c.each {|k,v| c[k]=Array.wrap(v).unshift(10**20)}
+            crit.add_restriction(to_lucene_pair(c, operator: "BETWEEN"))
+          end
         end
       end
-      self
     end
 
     # Add a 'greater or equal than' selector
@@ -101,13 +105,14 @@ module Ripple
     # will append this selector:
     # "((quantity:[0 TO *] AND ratings:[5 TO *]))"
     def gte(*criterion)
-      add_restriction do
-        criterion.each do |crit|
-          crit.each {|k,v| crit[k]=Array.wrap(v).push(10**20)}
-          add_restriction(to_lucene_pair(crit, operator: "BETWEEN"))
+      clone.tap do |crit|
+        crit.add_restriction do
+          crit.criterion.each do |c|
+            c.each {|k,v| c[k]=Array.wrap(v).push(10**20)}
+            crit.add_restriction(to_lucene_pair(c, operator: "BETWEEN"))
+          end
         end
       end
-      self
     end
 
     # Add a 'less than' selector
@@ -119,13 +124,14 @@ module Ripple
     # will append this selector:
     # "((quantity:{* TO 10} AND ratings:{* TO 5}))"
     def lt(*criterion)
-      add_restriction do
-        criterion.each do |crit|
-          crit.each {|k,v| crit[k]=Array.wrap(v).unshift("*")}
-          add_restriction(to_lucene_pair(crit, operator: "BETWEEN", exclusive: true))
+      clone.tap do |crit|
+        crit.add_restriction do
+          criterion.each do |c|
+            c.each {|k,v| c[k]=Array.wrap(v).unshift("*")}
+            crit.add_restriction(to_lucene_pair(c, operator: "BETWEEN", exclusive: true))
+          end
         end
       end
-      self
     end
 
     # Add a 'greater than' selector
@@ -137,13 +143,14 @@ module Ripple
     # will append this selector:
     # "((quantity:{0 TO *} AND ratings:{5 TO *}))"
     def gt(*criterion)
-      add_restriction do
-        criterion.each do |crit|
-          crit.each {|k,v| crit[k]=Array.wrap(v).push("*")}
-          add_restriction(to_lucene_pair(crit, operator: "BETWEEN", exclusive: true))
+      clone.tap do |crit|
+        crit.add_restriction do
+          criterion.each do |c|
+            c.each {|k,v| c[k]=Array.wrap(v).push("*")}
+            crit.add_restriction(to_lucene_pair(c, operator: "BETWEEN", exclusive: true))
+          end
         end
       end
-      self
     end
 
     # Add sort options to criteria
@@ -155,13 +162,14 @@ module Ripple
     # will append this sort option:
     # "availibility asc, created_at desc"
     def sort(sort_options)
-      case sort_options
-      when String
-        add_sort_option sort_options
-      when Hash
-        sort_options.each {|k,v| add_sort_option "#{k} #{v.downcase}"}
+      clone.tap do |crit|
+        case sort_options
+        when String
+          crit.add_sort_option sort_options
+        when Hash
+          sort_options.each {|k,v| crit.add_sort_option "#{k} #{v.downcase}"}
+        end
       end
-      self
     end
 
     alias :order_by :sort
@@ -175,9 +183,10 @@ module Ripple
     #
     # will limit the number of returned documetns to 10
     def limit(limit)
-      clear_cache
-      self.options[:rows] = limit
-      self
+      clone.tap do |crit|
+        crit.clear_cache
+        crit.options[:rows] = limit
+      end
     end
 
     alias :rows :limit
@@ -189,9 +198,10 @@ module Ripple
     #   Product.between(availibility:[1,3]).skip(10)
     #
     def skip(skip)
-      clear_cache
-      self.options[:start] = skip
-      self
+      clone.tap do |crit|
+        crit.clear_cache
+        crit.options[:start] = skip
+      end
     end
 
     alias :start :skip
@@ -246,6 +256,22 @@ module Ripple
       ->{ self }
     end
 
+    def ==(other)
+      self.klass == other.klass && self.selector == other.selector && self.options == other.options
+    end
+
+    def initialize_copy(other)
+      @selector = other.selector.dup
+      @options = other.options.dup
+      if other.response.present?
+        @response = other.response.dup
+        @documents = other.documents.dup
+        @docs = other.docs.dup
+        @document_ids = other.document_ids.dup
+      end
+      super
+    end
+
     def method_missing(name, *args, &block)
       if klass.respond_to?(name)
         klass.send(:with_scope, self) do
@@ -256,7 +282,7 @@ module Ripple
       end
     end
 
-  private
+  protected
 
     def clear_cache
       @documents, @cached, @response, @total, @docs, @document_ids = [], false

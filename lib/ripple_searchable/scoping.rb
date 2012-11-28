@@ -12,6 +12,23 @@ module Ripple
 
     module ClassMethods
 
+
+      # Create a scope that can be accessed from the class level or chained to
+      # criteria by the provided name.
+      #
+      # === Example
+      #
+      #   class Product
+      #     include Ripple::Document
+      #
+      #     scope :active, where(active: true)
+      #     scope :avail, ->(count){ where(quantity: count)}
+      #   end
+      #
+      #   Product.active.where(name: "peter")
+      #
+      # sets the selector to:
+      # "((active:true)) AND (name:peter)"
       def scope(name, value, &block)
         name = name.to_sym
         valid_scope_name?(name)
@@ -24,7 +41,7 @@ module Ripple
 
       def default_scope(value)
         self.default_scoping = if default_scoping
-          ->{ default_scoping.call.merge(value.to_proc.call) }
+          ->{ default_scoping.call.merge(value.to_proc.call) } unless default_scoping.call == value
         else
           value.to_proc
         end
