@@ -56,7 +56,12 @@ module Ripple
       end
 
       def without_default_scope
+        Thread.current[:"#{self.bucket_name}_without_default_scope"] = true
         scope_stack.last || Criteria.new(self)
+      end
+
+      def without_default_scope?
+        Thread.current[:"#{self.bucket_name}_without_default_scope"]
       end
 
       def with_scope(criteria)

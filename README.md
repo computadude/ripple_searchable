@@ -58,7 +58,10 @@ Use 'scope' class method to create a named scope that can be accessed from the c
 
 See [docs](http://rubydoc.info/github/computadude/ripple_searchable/master/frames) for method details.
 
-TODO: Write better docs.
+TODO: 
+
+Ability to bypass default scopes when using named scopes
+Write better docs.
 
 ## Contributing
 
