@@ -272,6 +272,36 @@ module Ripple
       super
     end
 
+    # Get the count of matching documents in the database for the context.
+    #
+    # @example Get the count without skip and limit taken into consideration.
+    #   context.count
+    #
+    # @example Get the count with skip and limit applied.
+    #   context.count(true)
+    #
+    # @param [Boolean] extras True to inclued previous skip/limit
+    #   statements in the count; false to ignore them. Defaults to `false`.
+    #
+    # @return [ Integer ] The count of documents.
+    def count(extras = false)
+      if extras
+        self.total
+      else
+        super()
+      end
+    end
+
+    def in_batches(limit=1000)
+      skip = 0
+      objects = self.limit(limit).skip(skip*limit)
+      while objects.count(true) > 0
+        yield objects
+        skip+=1
+        objects = self.limit(limit).skip(skip*limit)
+      end
+    end
+
     def method_missing(name, *args, &block)
       if klass.respond_to?(name)
         klass.send(:with_scope, self) do
