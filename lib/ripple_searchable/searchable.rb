@@ -41,10 +41,8 @@ module Ripple
       end
 
       def index_after_save!
-        Rails.logger.info "!!! creating after save"
         class_eval do
           after_save do |m|
-            Rails.logger.info "!!! after save"
             Ripple.client.index(m.class.bucket_name, m.attributes.reject {|k,v| v.nil?}.merge(id: m.id))
           end
         end
