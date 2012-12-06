@@ -14,8 +14,8 @@ module Ripple
       Ripple::SearchableObserver.observed_classes << self
       begin
         Ripple::SearchableObserver.instance
-      rescue Exception => e
-        puts e.message
+      rescue Exception
+        # module not extended yet
       end
     end
 

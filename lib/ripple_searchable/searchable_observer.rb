@@ -11,7 +11,6 @@ module Ripple
     end
 
     def after_save(m)
-      Rails.logger.info "!!! after save #{m.class.bucket_name}"
       Ripple.client.index(m.class.bucket_name, m.attributes.reject {|k,v| v.nil?}.merge(id: m.id))
     end
   end
