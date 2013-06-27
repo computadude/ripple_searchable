@@ -1,0 +1,4 @@
+en:
+  ripple:
+    empty_selector_error: "empty selector error (ripple_searchable SHOULD supply this translation but didn't)"
+    failed_query: "failed query (ripple_searchable SHOULD supply this translation but didn't)"
