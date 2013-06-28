@@ -23,4 +23,4 @@ Ripple::Document.class_eval do
   include Ripple::Scoping
 end
 
-
+I18n.load_path << File.join(File.dirname(__FILE__), "config", "locales", "en.yml")

@@ -1,0 +1,4 @@
+en:
+  ripple:
+    empty_selector_error: "empty selector error in Ripple"
+    failed_query: "failed query in Ripple"
